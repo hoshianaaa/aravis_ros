@@ -33,7 +33,7 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
 static gboolean
 periodic_task_cb (void *abstract_data)
 {
-	ApplicationData *data = abstract_data;
+	ApplicationData *data = (ApplicationData*)abstract_data;
 
 	printf ("Frame rate = %d Hz\n", data->buffer_count);
 	data->buffer_count = 0;
