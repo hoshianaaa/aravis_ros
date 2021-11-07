@@ -211,8 +211,8 @@ include_directories(
 
 link_directories(/home/hoshina/aravis-0.8.19/build/src)
 
-add_executable(get_buffer src/get_buffer.cpp)
-target_link_libraries(get_buffer ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
+add_executable(buffer src/get_buffer.cpp)
+target_link_libraries(buffer ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
 
-add_executable(get_stream src/get_stream.cpp)
-target_link_libraries(get_stream ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
+add_executable(stream src/get_stream.cpp)
+target_link_libraries(stream ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
