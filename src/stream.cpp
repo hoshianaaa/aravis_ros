@@ -26,7 +26,7 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
 		if (arv_buffer_get_status (buffer) == ARV_BUFFER_STATUS_SUCCESS)
 			data->buffer_count++;
 		/* Image processing here */
-		//arv_stream_push_buffer (stream, buffer);
+		arv_stream_push_buffer (stream, buffer);
 	}
 }
 
