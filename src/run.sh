@@ -1,1 +1,1 @@
-rosrun aravis_ros stream
+rosrun aravis_ros node

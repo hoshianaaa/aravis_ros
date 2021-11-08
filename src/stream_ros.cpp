@@ -9,6 +9,13 @@
 #include <image_transport/image_transport.h>
 #include <camera_info_manager/camera_info_manager.h>
 
+image_transport::Publisher publisher;
+ros::NodeHandle *node_handle;
+ros::Time p_cb_time;
+
+gint width;
+gint height;
+
 typedef struct {
 	GMainLoop *main_loop;
 	int buffer_count;
@@ -32,6 +39,26 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
 		if (arv_buffer_get_status (buffer) == ARV_BUFFER_STATUS_SUCCESS)
 			data->buffer_count++;
 		/* Image processing here */
+
+        int step = width; // XXX how to check this?
+
+        size_t buffer_size;
+        const uint8_t * buffer_data = static_cast<const uint8_t *>(arv_buffer_get_data(buffer, &buffer_size));
+
+        std::vector<uint8_t> this_data(buffer_size);
+        memcpy(&this_data[0], buffer_data, buffer_size);
+
+        sensor_msgs::Image msg;
+        msg.header.stamp = ros::Time::now(); // host timestamps (else buffer->timestamp_ns)
+        msg.header.seq = arv_buffer_get_frame_id (buffer); msg.header.frame_id = "camera";
+        msg.height = height;
+        msg.width = width;
+        msg.encoding = "mono8";  // XXX fixme
+        msg.step = step;
+        msg.data = this_data;
+
+        publisher.publish(msg);
+    
 		arv_stream_push_buffer (stream, buffer);
 	}
 }
@@ -64,6 +91,13 @@ control_lost_cb (ArvGvDevice *gv_device)
 int
 main (int argc, char **argv)
 {
+
+  ros::init(argc, argv, "aravis");
+  node_handle = new ros::NodeHandle();
+
+  image_transport::ImageTransport *transport = new image_transport::ImageTransport(*node_handle);
+  publisher = transport->advertise("image_raw", 1);
+
 	ApplicationData data;
 	ArvCamera *camera;
 	ArvStream *stream;
@@ -80,7 +114,9 @@ main (int argc, char **argv)
 		gint payload;
 
 		/* Set region of interrest to a 200x200 pixel area */
-		arv_camera_set_region (camera, 0, 0, 200, 200, NULL);
+		//arv_camera_set_region (camera, 0, 0, 200, 200, NULL);
+    gint x,y;
+    arv_camera_get_region (camera, &x, &y, &width, &height, NULL);
 		/* Set frame rate to 10 Hz */
 		arv_camera_set_frame_rate (camera, 10.0, NULL);
 		/* retrieve image payload (number of bytes per image) */
