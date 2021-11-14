@@ -80,7 +80,6 @@ set_cancel (int signal)
 static void
 new_buffer_cb (ArvStream *stream, ApplicationData *data)
 {
-  std::cout << "callback" << std::endl;
 	ArvBuffer *buffer;
 
 	buffer = arv_stream_try_pop_buffer (stream);
