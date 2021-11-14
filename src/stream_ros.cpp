@@ -60,7 +60,7 @@ void arv_save_png(ArvBuffer * buffer, const char * filename)
 image_transport::Publisher publisher;
 ros::NodeHandle *node_handle;
 ros::Time p_cb_time;
-
+ros::Time start_time;
 gint width;
 gint height;
 
@@ -80,6 +80,7 @@ set_cancel (int signal)
 static void
 new_buffer_cb (ArvStream *stream, ApplicationData *data)
 {
+  std::cout << "callback" << std::endl;
 	ArvBuffer *buffer;
 
 	buffer = arv_stream_try_pop_buffer (stream);
@@ -97,10 +98,11 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
         size_t buffer_size;
         const uint8_t * buffer_data = static_cast<const uint8_t *>(arv_buffer_get_data(buffer, &buffer_size));
 
-        std::cout << "buffer size:" << buffer_size << std::endl;
+        //std::cout << "buffer size:" << buffer_size << std::endl;
         std::vector<uint8_t> this_data(buffer_size);
         memcpy(&this_data[0], buffer_data, buffer_size);
 
+        /*
         std::cout << "data:";
         for(int i=0;i<buffer_size;i++)
         {
@@ -114,6 +116,7 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
           std::cout << " " << int(this_data[i]);
         }
         std::cout << std::endl;
+        */
 
         sensor_msgs::Image msg;
         msg.header.stamp = ros::Time::now(); // host timestamps (else buffer->timestamp_ns)
@@ -132,10 +135,17 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
         double delay = (pub_end - pub_start).toSec();
         if (delay < 0.001)delay=0;
 
-        std::cout << "pub delay[/s]:" << delay << std::endl;
+        //std::cout << "pub delay[/s]:" << delay << std::endl;
     }
-
+    else
+    {
+      std::cout << "Image broken !!!" << std::endl;
+    }
 	}
+  else
+  {
+    std::cout << "Buffer null !!!" << std::endl;
+  }
 }
 
 static gboolean
@@ -143,7 +153,15 @@ periodic_task_cb (void *abstract_data)
 {
 	ApplicationData *data = (ApplicationData*)abstract_data;
 
-	printf ("Frame rate = %d Hz\n", data->buffer_count);
+  int frame_rate = data->buffer_count;
+  ROS_INFO("Frame_rate %i", frame_rate);
+  //ROS_DEBUG("Frame_rate %i", data->buffer_count);
+  if (frame_rate == 0)ROS_ERROR("FRAME RATE 0!!!");
+  
+  ros::Time pub_end = ros::Time::now();
+  double start_diff = (pub_end - start_time).toSec();
+
+  std::cout << "start diff[/s]:" << start_diff << std::endl;
 	data->buffer_count = 0;
 
 	if (cancel) {
@@ -169,6 +187,8 @@ main (int argc, char **argv)
 
   ros::init(argc, argv, "aravis");
   node_handle = new ros::NodeHandle();
+
+  start_time = ros::Time::now();
 
   image_transport::ImageTransport *transport = new image_transport::ImageTransport(*node_handle);
   publisher = transport->advertise("image_raw", 1);

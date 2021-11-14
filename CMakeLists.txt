@@ -7,7 +7,9 @@ project(aravis_ros)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(PNG REQUIRED) #追加
+find_package(OpenCV REQUIRED) #追加
+find_package(catkin REQUIRED roscpp image_transport camera_info_manager cv_bridge)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -114,6 +116,8 @@ catkin_package(
 include_directories(
 # include
 # ${catkin_INCLUDE_DIRS}
+${OpenCV_INCLUDE_DIRS}
+${PNG_INCLUDE_DIRS} #追加
 )
 
 ## Declare a C++ library
@@ -216,3 +220,12 @@ target_link_libraries(buffer ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2
 
 add_executable(stream src/stream.cpp)
 target_link_libraries(stream ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
+
+add_executable(stream_ros src/stream_ros.cpp)
+target_link_libraries(stream_ros ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8 ${PNG_LIBRARIES} #追加
+)
+
+
+
+add_executable(opencv src/opencv.cpp)
+target_link_libraries(opencv ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
