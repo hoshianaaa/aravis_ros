@@ -87,7 +87,7 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
 	if (buffer != NULL) {
 		if (arv_buffer_get_status (buffer) == ARV_BUFFER_STATUS_SUCCESS)
     {
-      arv_save_png(buffer, "image.png");
+//      arv_save_png(buffer, "image.png");
 			data->buffer_count++;
 		/* Image processing here */
 
