@@ -100,7 +100,7 @@ main (int argc, char **argv)
 		gint payload;
 
 		/* Set region of interrest to a 200x200 pixel area */
-		arv_camera_set_region (camera, 0, 0, 200, 200, NULL);
+		//arv_camera_set_region (camera, 0, 0, 200, 200, NULL);
 		/* Set frame rate to 10 Hz */
 		//arv_camera_set_frame_rate (camera, 10.0, NULL);
 		/* retrieve image payload (number of bytes per image) */
