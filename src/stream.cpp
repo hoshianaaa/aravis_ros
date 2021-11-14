@@ -3,6 +3,8 @@
 #include <signal.h>
 #include <stdio.h>
 
+#include <ros/ros.h>
+
 typedef struct {
 	GMainLoop *main_loop;
 	int buffer_count;
@@ -16,16 +18,30 @@ set_cancel (int signal)
 	cancel = TRUE;
 }
 
+ros::NodeHandle *node_handle;
+ros::Time last_cb_time;
+ros::Time start_time;
+
 static void
 new_buffer_cb (ArvStream *stream, ApplicationData *data)
 {
+
+  ros::Time now_cb_time = ros::Time::now();
+  double cbtime = (now_cb_time - last_cb_time).toSec();
+  //std::cout << "cbtime[s] = " << cbtime << std::endl;
+  last_cb_time = now_cb_time;
+
 	ArvBuffer *buffer;
 
 	buffer = arv_stream_try_pop_buffer (stream);
 	if (buffer != NULL) {
 		if (arv_buffer_get_status (buffer) == ARV_BUFFER_STATUS_SUCCESS)
+    {
 			data->buffer_count++;
-		/* Image processing here */
+		  /* Image processing here */
+      int microsecond = 0.1 * 1000000;
+      //usleep(microsecond);
+    }
 		arv_stream_push_buffer (stream, buffer);
 	}
 }
@@ -37,6 +53,10 @@ periodic_task_cb (void *abstract_data)
 
 	printf ("Frame rate = %d Hz\n", data->buffer_count);
 	data->buffer_count = 0;
+
+  ros::Time pub_end = ros::Time::now();
+  double start_diff = (pub_end - start_time).toSec();
+  std::cout << "start diff:" << start_diff << std::endl;
 
 	if (cancel) {
 		g_main_loop_quit (data->main_loop);
@@ -58,6 +78,12 @@ control_lost_cb (ArvGvDevice *gv_device)
 int
 main (int argc, char **argv)
 {
+
+  ros::init(argc, argv, "stream");
+  node_handle = new ros::NodeHandle();
+
+  start_time = ros::Time::now();
+
 	ApplicationData data;
 	ArvCamera *camera;
 	ArvStream *stream;
@@ -76,7 +102,7 @@ main (int argc, char **argv)
 		/* Set region of interrest to a 200x200 pixel area */
 		arv_camera_set_region (camera, 0, 0, 200, 200, NULL);
 		/* Set frame rate to 10 Hz */
-		arv_camera_set_frame_rate (camera, 10.0, NULL);
+		//arv_camera_set_frame_rate (camera, 10.0, NULL);
 		/* retrieve image payload (number of bytes per image) */
 		payload = arv_camera_get_payload (camera, NULL);
 
