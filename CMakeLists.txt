@@ -7,7 +7,8 @@ project(aravis_ros)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED)
+find_package(catkin REQUIRED roscpp image_transport camera_info_manager cv_bridge)
+find_package(PNG REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -203,6 +204,7 @@ include_directories(
 
 include_directories(
  ${catkin_INCLUDE_DIRS}
+ ${PNG_INCLUDE_DIRS}
  /home/hoshina/aravis-0.8.19/build/src
  /home/hoshina/aravis-0.8.19/src
  /usr/include/glib-2.0/
@@ -216,3 +218,9 @@ target_link_libraries(buffer ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2
 
 add_executable(stream src/stream.cpp)
 target_link_libraries(stream ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
+
+add_executable(save_png src/save_png.cpp)
+target_link_libraries(save_png ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8 ${PNG_LIBRARY})
+
+add_executable(node src/stream_ros.cpp)
+target_link_libraries(node ${catkin_LIBRARIES}  glib-2.0 gmodule-2.0 gobject-2.0 aravis-0.8)
