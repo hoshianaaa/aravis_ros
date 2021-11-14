@@ -40,11 +40,14 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
 			data->buffer_count++;
 		/* Image processing here */
 
+        ros::Time pub_start = ros::Time::now();
+
         int step = width; // XXX how to check this?
 
         size_t buffer_size;
         const uint8_t * buffer_data = static_cast<const uint8_t *>(arv_buffer_get_data(buffer, &buffer_size));
 
+        std::cout << "buffer size:" << buffer_size << std::endl;
         std::vector<uint8_t> this_data(buffer_size);
         memcpy(&this_data[0], buffer_data, buffer_size);
 
@@ -58,8 +61,15 @@ new_buffer_cb (ArvStream *stream, ApplicationData *data)
         msg.data = this_data;
 
         publisher.publish(msg);
-    
-		arv_stream_push_buffer (stream, buffer);
+		    arv_stream_push_buffer (stream, buffer);
+
+        ros::Time pub_end = ros::Time::now();
+
+        double delay = (pub_end - pub_start).toSec();
+        if (delay < 0.001)delay=0;
+
+        std::cout << "pub delay[/s]:" << delay << std::endl;
+
 	}
 }
 
@@ -118,7 +128,7 @@ main (int argc, char **argv)
     gint x,y;
     arv_camera_get_region (camera, &x, &y, &width, &height, NULL);
 		/* Set frame rate to 10 Hz */
-		arv_camera_set_frame_rate (camera, 10.0, NULL);
+		arv_camera_set_frame_rate (camera, 25.0, NULL);
 		/* retrieve image payload (number of bytes per image) */
 		payload = arv_camera_get_payload (camera, NULL);
 
